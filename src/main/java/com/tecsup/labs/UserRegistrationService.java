@@ -4,82 +4,116 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Servicio de registro de usuarios con varios problemas de calidad intencionales
- * para el laboratorio.
+ * Servicio encargado del registro y validación de datos de usuarios.
+ * Esta clase aplica buenas prácticas de encapsulamiento, validación
+ * y manejo seguro de errores conforme a estándares de calidad.
  */
-public class UserRegistrationService {
+public final class UserRegistrationService {
 
-    // Mala práctica: campo público y mutable
-    public String lastErrorMessage = "";
+    /**
+     * Último mensaje de error producido durante la validación.
+     */
+    private String lastErrorMessage;
 
-    // Mala práctica: lista sin genéricos
-    private List users = new ArrayList();
+    /**
+     * Lista de usuarios registrados.
+     */
+    private final List<String> users = new ArrayList<>();
 
-    // Mala práctica: número mágico
+    /**
+     * Longitud mínima esperada para una contraseña válida.
+     */
     private static final int MIN_PASSWORD_LENGTH = 8;
 
-    // Constructor con lógica innecesaria
+    /**
+     * Constructor de la clase. No ejecuta lógica adicional.
+     */
     public UserRegistrationService() {
-        System.out.println("Constructor llamado");
-        if (users == null) { // Esta condición nunca se cumple
-            users = new ArrayList();
-        }
+        // No se requiere lógica adicional.
     }
 
     /**
-     * Registra un nuevo usuario.
-     * Retorna true si se registra, false en caso contrario.
+     * Retorna el último mensaje de error registrado.
+     *
+     * @return mensaje de error o null si no existe
      */
-    public boolean registerUser(String username, String password, String email) {
+    public String getLastErrorMessage() {
+        return this.lastErrorMessage;
+    }
+
+    /**
+     * Permite registrar un usuario validando sus datos de entrada.
+     *
+     * @param username nombre del usuario
+     * @param password contraseña del usuario
+     * @param email    correo electrónico válido
+     * @return true si el registro es exitoso, false en caso contrario
+     */
+    public boolean registerUser(final String username,
+            final String password, final String email) {
+
         if (username == null || username.trim().isEmpty()) {
-            lastErrorMessage = "El nombre de usuario está vacío.";
+            this.lastErrorMessage = "El nombre de usuario está vacío.";
             return false;
         }
 
         if (password == null) {
-            lastErrorMessage = "La contraseña es null.";
+            this.lastErrorMessage = "La contraseña es null.";
             return false;
         }
 
         if (password.length() < MIN_PASSWORD_LENGTH) {
-            lastErrorMessage = "La contraseña es muy corta.";
+            this.lastErrorMessage = "La contraseña es muy corta.";
             return false;
         }
 
-        if (password.length() < MIN_PASSWORD_LENGTH) { // Duplicado intencional
-            System.out.println("Advertencia: contraseña corta.");
-        }
-
-        if (!email.contains("@") && !email.contains(".")) {
-            lastErrorMessage = "El correo electrónico no parece válido.";
+        if (!email.contains("@") || !email.contains(".")) {
+            this.lastErrorMessage = "El correo electrónico no parece válido.";
+            return false;
         }
 
         try {
-            saveUser(username, password, email);
+            saveUser(username);
         } catch (Exception e) {
-            lastErrorMessage = "Error desconocido al guardar el usuario.";
+            this.lastErrorMessage = "Error desconocido al guardar el usuario.";
             return false;
         }
 
+        this.lastErrorMessage = null;
         System.out.println("Usuario registrado: " + username);
         return true;
     }
 
-    private void saveUser(String username, String password, String email) throws Exception {
-        users.add(username);
+    /**
+     * Almacena el nombre de usuario en la lista.
+     *
+     * @param username nombre del usuario
+     * @throws Exception si el nombre es considerado no permitido
+     */
+    private void saveUser(final String username) throws Exception {
+        this.users.add(username);
+
         if ("error".equals(username)) {
             throw new Exception("Nombre de usuario no permitido.");
         }
     }
 
-    // Método con nombre poco claro y sin comentarios
-    public int x(String s) {
-        if (s == null) {
+    /**
+     * Retorna la longitud del texto ingresado.
+     * Si es null, retorna -1.
+     *
+     * @param text texto a evaluar
+     * @return longitud del texto o -1 si es null
+     */
+    public int countCharacters(final String text) {
+        if (text == null) {
             return -1;
         }
-        String result = "";
-        for (int i = 0; i < s.length(); i++) {
-            result = result + s.charAt(i);
+
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < text.length(); i++) {
+            result.append(text.charAt(i));
         }
         return result.length();
     }
